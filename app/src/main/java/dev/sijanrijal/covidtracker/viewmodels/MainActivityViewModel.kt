@@ -13,31 +13,34 @@ import kotlinx.coroutines.launch
 
 class MainActivityViewModel : ViewModel() {
 
-    private var _nationData = MutableLiveData<List<COVIDData>>()
-    val nationData : LiveData<List<COVIDData>>
-        get() = _nationData
+    var nationData = mutableListOf<COVIDData>()
 
-    private var _stateData = MutableLiveData<Map<String, List<COVIDData>>>()
-    val stateData : LiveData<Map<String, List<COVIDData>>>
-        get() = _stateData
+
+    var stateData = mutableMapOf<String, List<COVIDData>>()
+
+    private val _areDataReady = MutableLiveData<Boolean>()
+    val areDataReady: LiveData<Boolean>
+        get() = _areDataReady
 
     var stateList = mutableListOf<String>()
 
+    //launch the coroutine to fetch the latest data from the internet
     init {
         viewModelScope.launch {
             fetch()
         }
     }
 
+
+    //fetch the data from the internet and notify the user once it is ready
     private suspend fun fetch() {
         coroutineScope {
-           val nationalListDeferred =  async (Dispatchers.IO) {
+            val nationalListDeferred = async(Dispatchers.IO) {
                 COVIDApiService.retrofitService.getAllUSData().reversed()
             }
-            val stateListDeferred = async (Dispatchers.IO) {
+            val stateListDeferred = async(Dispatchers.IO) {
                 COVIDApiService.retrofitService.getAllStatesData()
             }
-            _nationData.value = nationalListDeferred.await()
             val list = stateListDeferred.await()
 
             val stateValueDeferred = async(Dispatchers.Default) {
@@ -48,7 +51,9 @@ class MainActivityViewModel : ViewModel() {
                 return@async map
             }
 
-            _stateData.value = stateValueDeferred.await()
+            stateData = stateValueDeferred.await()
+            nationData = nationalListDeferred.await() as MutableList<COVIDData>
+            _areDataReady.value = true
 
         }
     }

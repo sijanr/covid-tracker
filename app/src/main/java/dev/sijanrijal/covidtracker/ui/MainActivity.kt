@@ -22,13 +22,13 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding : ActivityMainBinding
-    private lateinit var viewModel : MainActivityViewModel
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var viewModel: MainActivityViewModel
     private lateinit var graphAdapter: GraphAdapter
 
     private var currentDataSelection = DATA_TYPE.US
     private var currentStateSelection = ""
-    private var stateAdapter : ArrayAdapter<String>? = null
+    private var stateAdapter: ArrayAdapter<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,35 +36,52 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         graphAdapter = GraphAdapter(listOf())
+
+        //initialize the views and set click listeners on radio buttons and country/state options
         init()
 
         viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
 
-        viewModel.stateData.observe(this, {
-            displayAndsetMenus(viewModel.stateList)
+        //display the data when it is ready
+        viewModel.areDataReady.observe(this, { isReady ->
+            if (isReady) {
+                displayAndsetMenus(viewModel.stateList)
+            }
         })
-
-        viewModel.nationData.observe(this, { covidDataList ->
-            updateGraph(covidDataList)
-        })
-
     }
 
+
+    //hide the views that aren't ready to be displayed
     private fun init() {
         binding.radioButtonPositive.isChecked = true
         binding.radiobuttonMax.isChecked = true
         binding.state.visibility = View.INVISIBLE
+        binding.menuUsState.visibility = View.INVISIBLE
         setEventListeners()
     }
 
-    private fun displayAndsetMenus(list : MutableList<String>) {
+    //display the views and the menus when the data is ready
+    private fun displayAndsetMenus(list: MutableList<String>) {
         val nationAdapter = ArrayAdapter(this, R.layout.list_item, listOf("State", "US"))
         (binding.menuUsState.editText as? AutoCompleteTextView)?.setAdapter(nationAdapter)
         currentStateSelection = list.first()
         stateAdapter = ArrayAdapter(this, R.layout.list_item, viewModel.stateList)
         (binding.state.editText as? AutoCompleteTextView)?.setAdapter(stateAdapter)
+        displayViews()
+        updateGraph(viewModel.nationData)
     }
 
+    //hide the progress bar and display the views when the data is ready
+    private fun displayViews() {
+        binding.radiogroupCaseType.visibility = View.VISIBLE
+        binding.radiogroupTimeline.visibility = View.VISIBLE
+        binding.menuUsState.visibility = View.VISIBLE
+        binding.progressIndicator.visibility = View.GONE
+        binding.graph.visibility = View.VISIBLE
+        binding.graph.visibility = View.VISIBLE
+    }
+
+    //update graph with the latest data based on the user-selected option
     private fun updateGraph(covidData: List<COVIDData>) {
         val data = covidData.last()
         updateDateAndMetric(data)
@@ -72,8 +89,9 @@ class MainActivity : AppCompatActivity() {
         binding.graph.adapter = graphAdapter
     }
 
-    private fun updateDateAndMetric(data : COVIDData) {
-        val numCases = when(graphAdapter.caseType) {
+    //update data and metric based on the user-selected option
+    private fun updateDateAndMetric(data: COVIDData) {
+        val numCases = when (graphAdapter.caseType) {
             CASE_TYPE.POSITIVE -> data.dailyIncreaseCases
             CASE_TYPE.NEGATIVE -> data.dailyDecreaseCases
             CASE_TYPE.DEATH -> data.deathIncreaseCases
@@ -85,8 +103,9 @@ class MainActivity : AppCompatActivity() {
             .format(date)
     }
 
+    //update the line color of the graph as the user selects different case types
     private fun updateGraphStyle() {
-        val colorResource = when(graphAdapter.caseType) {
+        val colorResource = when (graphAdapter.caseType) {
             CASE_TYPE.POSITIVE -> R.color.positive_increase
             CASE_TYPE.NEGATIVE -> R.color.negative_increase
             else -> R.color.death_increase
@@ -95,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         binding.metricLabel.textColor = ContextCompat.getColor(this, colorResource)
     }
 
+    //set click listeners
     private fun setEventListeners() {
         binding.graph.isScrubEnabled = true
         binding.graph.setScrubListener { data ->
@@ -104,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.radiogroupTimeline.setOnCheckedChangeListener { _, checkedId ->
-            graphAdapter.timeLine = when(checkedId) {
+            graphAdapter.timeLine = when (checkedId) {
                 R.id.radiobutton_week -> Metric.WEEK
                 R.id.radiobutton_month -> Metric.MONTH
                 else -> Metric.MAX
@@ -113,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.radiogroupCaseType.setOnCheckedChangeListener { _, checkedId ->
-            graphAdapter.caseType = when(checkedId) {
+            graphAdapter.caseType = when (checkedId) {
                 R.id.radioButton_positive -> CASE_TYPE.POSITIVE
                 R.id.radioButton_negative -> CASE_TYPE.NEGATIVE
                 else -> CASE_TYPE.DEATH
@@ -129,13 +149,16 @@ class MainActivity : AppCompatActivity() {
                     if (currentDataSelection != DATA_TYPE.US) {
                         currentDataSelection = DATA_TYPE.US
                         binding.state.visibility = View.INVISIBLE
-                        updateGraph(viewModel.nationData.value!!)
+                        updateGraph(viewModel.nationData)
                     }
                 } else {
                     currentDataSelection = DATA_TYPE.STATE
                     binding.state.visibility = View.VISIBLE
-                    (binding.state.editText as? AutoCompleteTextView)?.setText(currentStateSelection, false)
-                    updateGraph(viewModel.stateData.value!![currentStateSelection]!!)
+                    (binding.state.editText as? AutoCompleteTextView)?.setText(
+                        currentStateSelection,
+                        false
+                    )
+                    updateGraph(viewModel.stateData[currentStateSelection]!!)
                 }
             }
         }
@@ -144,7 +167,7 @@ class MainActivity : AppCompatActivity() {
             if (view is TextView) {
                 if (view.text != currentStateSelection) {
                     currentStateSelection = view.text.toString()
-                    updateGraph(viewModel.stateData.value!![currentStateSelection]!!)
+                    updateGraph(viewModel.stateData[currentStateSelection]!!)
                 }
             }
         }

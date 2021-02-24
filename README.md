@@ -4,6 +4,8 @@ COVID-19 Tracker is an **android application** that uses graph to depict the dai
 with deaths in the United States. You can filter the cases according to the states or you can also choose to see the aggregated
 statistics of the United States
 
+<img src="./app_demo.gif" height="650px" width="350"/>
+
 ## Getting Started
 Download the apk and install it on your phone or you can also clone the repo and build it and install it on your device.
 

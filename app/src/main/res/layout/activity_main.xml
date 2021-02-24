@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/menu_us_state"
         style="@style/Widget.CovidTracker.ExposedDropDown"
@@ -22,7 +23,7 @@
             android:id="@+id/autocomplete_us_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="US"
+            android:hint="@string/us"
             android:inputType="none" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -34,10 +35,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/menu_us_state"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="invisible">
+        app:layout_constraintTop_toTopOf="parent">
+
         <AutoCompleteTextView
             android:id="@+id/autocomplete_state"
             android:layout_width="wrap_content"
@@ -54,10 +56,11 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:paddingTop="8dp"
         android:background="#CFD8DC"
         android:gravity="center"
         android:orientation="horizontal"
+        android:visibility="invisible"
+        android:paddingTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/menu_us_state">
@@ -90,20 +93,21 @@
         android:id="@+id/graph"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:background="#CFD8DC"
+        android:padding="8dp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/radiogroup_timeline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radiogroup_case_type"
-        app:spark_lineColor="@color/positive_increase"
         app:spark_cornerRadius="2dp"
-        app:spark_scrubLineWidth="3dp"
+        app:spark_lineColor="@color/positive_increase"
+        app:spark_lineWidth="3dp"
         app:spark_scrubLineColor="@color/purple_200"
-        app:spark_lineWidth="3dp"/>
+        app:spark_scrubLineWidth="3dp" />
 
     <RadioGroup
         android:id="@+id/radiogroup_timeline"
@@ -112,10 +116,11 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
+        android:visibility="invisible"
         android:background="#CFD8DC"
         android:gravity="center"
-        android:paddingBottom="8dp"
         android:orientation="horizontal"
+        android:paddingBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/metric_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -153,23 +158,35 @@
         android:layout_height="48dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.robinhood.ticker.TickerView
         android:id="@+id/metric_label"
+        style="@style/TextAppearance.MaterialComponents.Headline5"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:gravity="center"
-        app:ticker_animationDuration="500"
         android:textColor="@color/positive_increase"
-        app:ticker_defaultPreferredScrollingDirection="any"
-        style="@style/TextAppearance.MaterialComponents.Headline5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/date_label" />
+        app:layout_constraintStart_toEndOf="@+id/date_label"
+        app:ticker_animationDuration="500"
+        app:ticker_defaultPreferredScrollingDirection="any" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:hideAnimationBehavior="outward"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
